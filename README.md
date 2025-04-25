@@ -28,12 +28,16 @@ uSentry integrates with this mechanism by providing session management, login, a
 ## 🛠️ Installation & Configuration
 
 1. Deploy the single `index.php` file to a directory, eg. `/web/usentry`
-2. Add your users and apps in `index.php`:
+2. Make a secure hash of your password (bcrypt):
+```
+php -r 'echo password_hash("your-password-here", PASSWORD_DEFAULT);'
+```
+3. Add your users and apps in `index.php`:
 ```php
 $credentials = [
     [
         "username"   => "User1",
-        "password"   => '$2y$2$000000000000000000001',
+        "password"   => '$2y$2$000000000000000000001', // Your password hash here
         "authorized" => [
             "https://your-local-domain-or-ip/filebrowser",
             "https://your-local-domain-or-ip/syncthing"
@@ -42,7 +46,7 @@ $credentials = [
 ];
 ```
    
-3. Add uSentry to your Nginx configuration (`/etc/nginx/conf.d/default.conf`):
+4. Add uSentry to your Nginx configuration (`/etc/nginx/conf.d/default.conf`):
 ```
 # uSentry Identity & Access Management ------------------------->
 location  ^~ /usentry/login {
@@ -76,7 +80,7 @@ location @error403 {
 }
 # uSentry Identity & Access Management <-------------------------
 ```
-4. Protect your websites / apps:
+5. Protect your websites / apps:
 ```
 # Example 1: protect Filebrowser, on a reverse proxy:
 location /files {
