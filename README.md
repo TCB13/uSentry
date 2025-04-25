@@ -18,8 +18,8 @@ uSentry is different, it *isn't pretty but it sucks less* for a lot of use cases
 - 🕵️ SSO-ready — Authenticate once, access all apps
 
 ## ⚙️ How Does It Work?
-Nginx has the ability to authenticate each request with an external solution. For example, if I try to browse to https://your-local-domain-or-ip/, Nginx can call another URL to check if it should allow access or not. 
-uSentry provides this functionality along with sessions and login/logout facilities. Check out https://nginx.org/en/docs/http/ngx_http_auth_request_module.html for more details.
+Nginx supports authenticating each request using an external service. For example, when you try to access https://your-local-domain-or-ip/, Nginx can call a separate URL to determine whether the request should be allowed.
+uSentry integrates with this mechanism by providing session management, login, and logout functionality. You may learn more about how this works in the official Nginx documentation: https://nginx.org/en/docs/http/ngx_http_auth_request_module.html.
 
 ## 💧 Requirements
 - ✅ Nginx (with ngx_http_auth_request_module)
