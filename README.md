@@ -1,5 +1,5 @@
 # 🛡️ uSentry - Identity & Access Management
-uSentry is a lightweight, self-hosted Identity and Access Management (IAM) and Single Sign-On (SSO) solution designed for homelab and small-scale environments.
+uSentry is a lightweight, self-hosted Identity and Access Management (IAM) and Single Sign-On (SSO) solution designed for homelabs and small-scale environments.
 
 **⚡ A single PHP file. < 400 lines of code. No database. No background processes. No cloud. Just works. ⚡**
 
