@@ -4,34 +4,42 @@
  * Configure NGINX:
  *  # uSentry Identity & Access Management Rules ------------------------->
  *  location  ^~ /usentry/login {
- *	    alias /mnt/SSD1/web/usentry;
- *	    auth_request off;
- *	    index index.php;
- *	    try_files $uri $uri/ index.php;
- *	    location ~ ^.+?\.php(/.*)?$ {
+ *      alias /mnt/SSD1/web/usentry;
+ *      auth_request off;
+ *      index index.php;
+ *      try_files $uri $uri/ index.php;
+ *      location ~ ^.+?\.php(/.*)?$ {
  *          include /etc/nginx/fastcgi_params;
  *          fastcgi_pass unix:/run/php/php7.4-fpm.sock;
  *          fastcgi_split_path_info ^(.+\.php)(/.*)$;
  *          set $path_info $fastcgi_path_info;
  *          fastcgi_param PATH_INFO $path_info;
  *          fastcgi_param SCRIPT_FILENAME $request_filename;
- *	    }
- *	}
- *	location = /usentry/auth_request {
- *	    internal;
- *	    proxy_pass https://your-local-domain-or-ip/usentry/login/?action=status;
- *	    proxy_pass_request_body off;
- *	    proxy_set_header Content-Length "";
- *	    proxy_set_header X-Original-URI $scheme://$host$request_uri;
- *	}
- *	error_page 401 = @error401;
- *	location @error401 {
- *	    return 302 /usentry/login/?code=401&redirect=$scheme://$host$request_uri;
- *	}
- *	error_page 403 = @error403;
- *	location @error403 {
- *	   return 302 /usentry/login/?code=403&redirect=$scheme://$host$request_uri;
- *	}
+ *      }
+ *  }
+ *  location = /usentry/auth_request {
+ *      internal;
+ *      proxy_pass https://your-local-domain-or-ip/usentry/login/?action=status;
+ *      proxy_pass_request_body off;
+ *      proxy_set_header Content-Length "";
+ *      proxy_set_header X-Original-URI $scheme://$host$request_uri;
+ *  }
+ *  error_page 401 = @error401;
+ *  location @error401 {
+ *      # If you're using WebDAV uncomment the following lines
+ *      #if ($request_method ~* "^(PROPFIND|PUT|DELETE|MKCOL|COPY|MOVE|LOCK|UNLOCK|OPTIONS)$") {
+ *      #    return 401;
+ *      #}
+ *      return 302 /usentry/login/?code=401&redirect=$scheme://$host$request_uri;
+ *  }
+ *  error_page 403 = @error403;
+ *  location @error403 {
+ *      # If you're using WebDAV uncomment the following lines
+ *      #if ($request_method ~* "^(PROPFIND|PUT|DELETE|MKCOL|COPY|MOVE|LOCK|UNLOCK|OPTIONS)$") {
+ *      #    return 403;
+ *      #}
+ *      return 302 /usentry/login/?code=403&redirect=$scheme://$host$request_uri;
+ *  }
  *  # uSentry Identity & Access Management Rules <-------------------------
  *
  */
@@ -77,34 +85,12 @@
  */
 
 /* uSentry Configuration */
-$sessionLifetime = 1 * 24 * 60 * 60; // 1 day
-
-/* 
- * Generate passwords:
- * php -r 'echo password_hash("xxxxxxx", PASSWORD_DEFAULT);'
-*/
-$credentials = [
-    [
-        "username"   => "User1",
-        "password"   => '$2y$2$000000000000000000001',
-        "authorized" => [
-            "https://your-local-domain-or-ip/filebrowser",
-            "https://your-local-domain-or-ip/syncthing"
-        ]
-    ],
-    [
-        "username"   => "User2",
-        "password"   => '$2y$2$000000000000000000002',
-        "authorized" => [
-            "https://your-local-domain-or-ip/filebrowser"
-        ]
-    ]
-];
-
+require_once("config.php");
 
 //  --------------------- No need to edit anything bellow this line ---------------------
 ini_set('session.use_strict_mode', '1');
 session_name("uSentryIAM");
+session_set_cookie_params(0);
 session_start();
 
 // Main action handler
@@ -137,8 +123,8 @@ function login()
         // Set expiracy date
         if (isset($_REQUEST['remember-me'])) {
             $params = session_get_cookie_params();
-            $params["expires"] = time() + $sessionLifetime;
-            setcookie(session_name(), session_id(), $params);
+            $expires = time() + $sessionLifetime;
+            setcookie(session_name(), session_id(), $expires, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
         }
 
         if (!empty($_REQUEST['redirect'])) {

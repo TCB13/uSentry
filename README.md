@@ -32,7 +32,7 @@ uSentry integrates with this mechanism by providing session management, login, a
 ```
 php -r 'echo password_hash("your-password-here", PASSWORD_DEFAULT);'
 ```
-3. Add your users and apps in `index.php`:
+3. Add your users and apps in `config.php`:
 ```php
 $credentials = [
     [
@@ -72,10 +72,18 @@ location = /usentry/auth_request {
 }
 error_page 401 = @error401;
 location @error401 {
+    # If you're using WebDAV uncomment the following lines
+    #if ($request_method ~* "^(PROPFIND|PUT|DELETE|MKCOL|COPY|MOVE|LOCK|UNLOCK|OPTIONS)$") {
+    #    return 401;
+    #}
     return 302 /usentry/login/?code=401&redirect=$scheme://$host$request_uri;
 }
 error_page 403 = @error403;
 location @error403 {
+    # If you're using WebDAV uncomment the following lines
+    #if ($request_method ~* "^(PROPFIND|PUT|DELETE|MKCOL|COPY|MOVE|LOCK|UNLOCK|OPTIONS)$") {
+    #    return 403;
+    #}
    return 302 /usentry/login/?code=403&redirect=$scheme://$host$request_uri;
 }
 # uSentry Identity & Access Management <-------------------------
